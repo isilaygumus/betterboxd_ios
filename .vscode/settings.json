@@ -1,0 +1,5 @@
+{
+    "files.autoSave": "afterDelay",
+    "dart.flutterHotReloadOnSave": "all",
+    "cmake.sourceDirectory": "C:/flutter_projeler/betterboxd_ios/windows",
+}
