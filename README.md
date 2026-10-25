@@ -1,17 +1,22 @@
 # betterboxd_ios
 
-A new Flutter project.
+Betterboxd
 
-## Getting Started
+Betterboxd, film severlerin izledikleri yapımları keşfedebileceği, puanlayabileceği ve yorumlayabileceği bir mobil uygulamadır. Flutter ile geliştirilmektedir.
 
-This project is a starting point for a Flutter application.
+Proje hala geliştirme aşamasındadır.
 
-A few resources to get you started if this is your first Flutter project:
+Genel Bakış
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Uygulama, alt gezinme çubuğu üzerinden erişilen dört ana bölümden oluşur:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Ana Sayfa: Film akışının gösterileceği başlangıç ekranı.
+Arama: Film arama ve keşfetme ekranı.
+Ekle: Film için puan ve yorum ekleme ekranı.
+Profil: Kullanıcı bilgilerinin yer alacağı ekran.
+
+Mevcut sürümde gezinme yapısı tamamlanmıştır. Ekranların içerikleri geliştirilmeye devam etmektedir.
+
+Kullanılan Teknolojiler
+Flutter
+Dart (SDK ^3.13.5)
