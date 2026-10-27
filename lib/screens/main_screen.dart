@@ -24,15 +24,15 @@ class _MainScreenState extends State<MainScreen> {
 @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Seçili indekse karşılık gelen ekranı gösterir
+
       body: _screens[currentPageIndex],
 
-      // Alt gezinme çubuğu (NavigationBar)
+      // Alt gezinme çubuğu
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentPageIndex,
         onDestinationSelected: (int index) {
           setState(() {
-            currentPageIndex = index; // Tıklanan butonun indeksini günceller
+            currentPageIndex = index;
           });
         },
         destinations: const [
