@@ -91,7 +91,7 @@ class HomeScreen extends StatelessWidget {
               color: const Color(0xFF2C3440),
               borderRadius: BorderRadius.circular(6.0),
               border: Border.all(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 width: 0.5,
               ),
             ),
