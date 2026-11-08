@@ -1,7 +1,29 @@
 import 'package:flutter/material.dart';
+import '../api_service.dart';
+import '../movie.dart';
+//import 'movie_list_page.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late Future<List<Movie>> _moviesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _moviesFuture = ApiService().getMovies();
+  }
+
+  void _reload() {
+    setState(() {
+      _moviesFuture = ApiService().getMovies();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,30 +44,93 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 1. Haftanın Trend Filmleri
-            _buildSectionHeader(context, 'Haftanın Trend Filmleri'),
-            const SizedBox(height: 12),
-            _buildMovieHorizontalList(),
+      body: FutureBuilder<List<Movie>>(
+        future: _moviesFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Filmler alınamadı:\n${snapshot.error}',
+                        textAlign: TextAlign.center),
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      onPressed: _reload,
+                      child: const Text('Tekrar dene'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
 
-            const SizedBox(height: 24),
+          final movies = snapshot.data!;
+          final trending = ([...movies]
+                ..sort((a, b) => b.rating.compareTo(a.rating)))
+              .take(8)
+              .toList();
+          final recent = movies.reversed.take(3).toList();
 
-            // 2. Popüler İncelemeler / Akış
-            _buildSectionHeader(context, 'Topluluktan Son İncelemeler'),
-            const SizedBox(height: 12),
-            _buildRecentReviewsList(),
-          ],
-        ),
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 1. Haftanın Trend Filmleri (API'den)
+                _buildSectionHeader(
+                  context,
+                  'Haftanın Trend Filmleri',
+                  onSeeAll: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => Scaffold(
+                          appBar: AppBar(title: const Text('Tüm Filmler')),
+                          body: const HomeScreen(),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                _buildMovieHorizontalList(context, trending),
+
+                const SizedBox(height: 24),
+
+                // 2. İncelemeler (yorum ve kullanıcı henüz yer tutucu)
+                _buildSectionHeader(context, 'Topluluktan Son İncelemeler'),
+                const SizedBox(height: 12),
+                _buildRecentReviewsList(context, recent),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
-  // Bölüm Başlığı Widget'ı
-  Widget _buildSectionHeader(BuildContext context, String title) {
+  // Afiş: internet yoksa ya da bağlantı bozuksa simge gösterir
+  Widget _poster(String? url) {
+    const fallback = Center(child: Icon(Icons.movie, color: Colors.grey));
+    if (url == null) return fallback;
+    return Image.network(
+      url,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      errorBuilder: (context, error, stackTrace) => fallback,
+    );
+  }
+
+  // Bölüm Başlığı
+  Widget _buildSectionHeader(BuildContext context, String title,
+      {VoidCallback? onSeeAll}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
@@ -61,11 +146,11 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           TextButton(
-            onPressed: () {},
-            child: const Text(
+            onPressed: onSeeAll ?? () {},
+            child: Text(
               'Tümü',
               style: TextStyle(
-                color: Color(0xFF00E054), 
+                color: Theme.of(context).colorScheme.primary,
                 fontSize: 13,
               ),
             ),
@@ -76,19 +161,21 @@ class HomeScreen extends StatelessWidget {
   }
 
   // Film Posterleri Yatay Listesi
-  Widget _buildMovieHorizontalList() {
+  Widget _buildMovieHorizontalList(BuildContext context, List<Movie> movies) {
+    final colors = Theme.of(context).colorScheme;
     return SizedBox(
       height: 170,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        itemCount: 6, // Şimdilik 6 geçici poster
+        itemCount: movies.length,
         itemBuilder: (context, index) {
+          final movie = movies[index];
           return Container(
             width: 110,
             margin: const EdgeInsets.only(right: 12.0),
             decoration: BoxDecoration(
-              color: const Color(0xFF2C3440),
+              color: colors.surface,
               borderRadius: BorderRadius.circular(6.0),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.1),
@@ -97,29 +184,7 @@ class HomeScreen extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(6.0),
-              child: Stack(
-                children: [
-                  
-                  Image.network([
-                    'https://media.themoviedb.org/t/p/w600_and_h900_face/Ap8QwmKfSjYbWC4XIP8w9pdn72O.jpg',
-                    'https://media.themoviedb.org/t/p/w440_and_h660_face/lmrulvLbmaejTix1YaMxo1oGhH1.jpg',
-                    'https://media.themoviedb.org/t/p/w600_and_h900_face/jT5SR5qc9KvVg7HUEmjMWEUYMce.jpg',
-                    'https://media.themoviedb.org/t/p/w260_and_h390_face/x7A59t6ySylr1L7aubOQEA480vM.jpg',
-                    'https://media.themoviedb.org/t/p/w600_and_h900_face/oQffRNjK8e19rF7xVYEN8ew0j7b.jpg',
-                    'https://media.themoviedb.org/t/p/w600_and_h900_face/glt0v4I89rMWstDNCaFXc5SNyO1.jpg',
-
-                    ][index],
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: double.infinity,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Center(
-                        child: Icon(Icons.movie, color: Colors.grey),
-                      );
-                    },
-                  ),
-                ],
-              ),
+              child: _poster(movie.posterUrl),
             ),
           );
         },
@@ -127,78 +192,83 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // İnceleme Kartları Listesi
-  Widget _buildRecentReviewsList() {
+  // İnceleme Kartları
+  Widget _buildRecentReviewsList(BuildContext context, List<Movie> movies) {
+    final colors = Theme.of(context).colorScheme;
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      itemCount: 3, // Geçici 3 inceleme
+      itemCount: movies.length,
       itemBuilder: (context, index) {
+        final movie = movies[index];
         return Container(
           margin: const EdgeInsets.only(bottom: 16.0),
           padding: const EdgeInsets.all(12.0),
           decoration: BoxDecoration(
-            color: const Color(0xFF1C2228),
+            color: colors.surface,
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Film Küçük Posteri
+              // Film küçük afişi
               ClipRRect(
                 borderRadius: BorderRadius.circular(4.0),
-                child: Image.network([
-                  'https://media.themoviedb.org/t/p/w260_and_h390_face/4kJmUCE7mkVJjXa7A0g2rY4IGTm.jpg',
-                  'https://media.themoviedb.org/t/p/w260_and_h390_face/mxsGXqetGnirf99qapYd5MMY1VL.jpg',
-                  'https://media.themoviedb.org/t/p/w600_and_h900_face/iEBJOgEOz0y8M7pUNGsOiRtZh5v.jpg',
-                  ][index],
+                child: SizedBox(
                   width: 60,
                   height: 90,
-                  fit: BoxFit.cover,
+                  child: _poster(movie.posterUrl),
                 ),
               ),
               const SizedBox(width: 12),
-              // İnceleme Detayları
+              // İnceleme detayları
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Örnek Film Adı',
-                      style: TextStyle(
+                    Text(
+                      movie.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const CircleAvatar(
-                          radius: 10,
-                          backgroundColor: Colors.grey,
-                          child: Icon(Icons.person, size: 12, color: Colors.white),
-                        ),
-                        const SizedBox(width: 6),
-                        const Text(
-                          'KullanıcıAdı',
-                          style: TextStyle(color: Colors.grey, fontSize: 13),
-                        ),
-                        const SizedBox(width: 8),
-                        // Yıldız Puanlama
-                        Row(
-                          children: List.generate(
-                            5,
-                            (starIndex) => Icon(
-                              Icons.star,
-                              size: 14,
-                              color: starIndex < 4
-                                  ? const Color(0xFF00E054)
-                                  : Colors.grey,
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          const CircleAvatar(
+                            radius: 10,
+                            backgroundColor: Colors.grey,
+                            child: Icon(Icons.person,
+                                size: 12, color: Colors.white),
+                          ),
+                          const SizedBox(width: 6),
+                          const Text(
+                            'KullanıcıAdı',
+                            style:
+                                TextStyle(color: Colors.grey, fontSize: 13),
+                          ),
+                          const SizedBox(width: 8),
+                          // Yıldız puanı (şimdilik filmin puanı)
+                          Row(
+                            children: List.generate(
+                              5,
+                              (starIndex) => Icon(
+                                Icons.star,
+                                size: 14,
+                                color: starIndex < movie.rating.round()
+                                    ? colors.primary
+                                    : Colors.grey,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 8),
                     const Text(

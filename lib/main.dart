@@ -10,15 +10,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      // ---- BURAYI EKLEDİK / DEĞİŞTİRDİK ----
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF14181C), // Letterboxd koyu arka planı
-        primaryColor: const Color(0xFF00E054),            // Letterboxd yeşili
+        scaffoldBackgroundColor: const Color(0xFF14181C), 
+        primaryColor: const Color(0xFF00E054),            
         colorScheme: const ColorScheme.dark(
           primary: Color(0xFF00E054),
-          secondary: Color(0xFF00E054),                    // Mavi vurgular
-          surface: Color(0xFF1C2228),                      // Kart ve AppBar yüzey rengi
+          secondary: Color(0xFF00E054),                    
+          surface: Color(0xFF1C2228),                      
         ),
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFF14181C),
@@ -26,8 +25,8 @@ class MyApp extends StatelessWidget {
           centerTitle: true,
         ),
       ),
-      // --------------------------------------
       home: const MainScreen(),
     );
   }
+  
 }
