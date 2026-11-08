@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import "add_review_screen.dart";
 import 'home_screen.dart';
-//import 'profile_screen.dart';
+import 'profile_screen.dart';
 import 'search_screen.dart';
-import 'auth/login_screen.dart';
+//import 'auth/login_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -18,7 +18,7 @@ class _MainScreenState extends State<MainScreen> {
     HomeScreen(),
     SearchScreen(),
     AddReviewScreen(),
-    LoginScreen(),
+    ProfileScreen(),
   ];
 
 
