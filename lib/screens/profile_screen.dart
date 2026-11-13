@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import '../auth_service.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
+  
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +24,7 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           children: [
             // Profil Resmi ve Kullanıcı Adı
-            const Center(
+            Center(
               child: Column(
                 children: [
                   CircleAvatar(
@@ -34,17 +36,17 @@ class ProfileScreen extends StatelessWidget {
                       color: Colors.white,
                     ),
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Text(
-                    'Kullanıcı Adı',
+                    AuthService.userName,
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    '@kullaniciadi',
+                    '@${AuthService.userName.toLowerCase()}',
                     style: TextStyle(
                       color: Colors.grey,
                       fontSize: 14,
@@ -94,7 +96,7 @@ class ProfileScreen extends StatelessWidget {
                 style: TextStyle(color: Colors.red),
               ),
               onTap: () {
-                // Çıkış yapma mantığı
+                AuthService.logout();
               },
             ),
           ],

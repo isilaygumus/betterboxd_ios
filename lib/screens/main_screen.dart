@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import '../auth_service.dart';
 import "add_review_screen.dart";
 import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'search_screen.dart';
-//import 'auth/login_screen.dart';
+import 'auth/login_screen.dart';
+
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -18,15 +20,23 @@ class _MainScreenState extends State<MainScreen> {
     HomeScreen(),
     SearchScreen(),
     AddReviewScreen(),
-    ProfileScreen(),
   ];
-
+Widget _buildBody(){
+  if (currentPageIndex == 3) {
+    return ValueListenableBuilder<Map<String, dynamic>?>(
+      valueListenable: AuthService.currentUser,
+      builder: (context, user, _) =>
+        user == null ? const LoginScreen() : const ProfileScreen(),
+    );
+  }
+  return _screens[currentPageIndex];
+}
 
 @override
   Widget build(BuildContext context) {
     return Scaffold(
 
-      body: _screens[currentPageIndex],
+      body: _buildBody(),
 
       // Alt gezinme çubuğu
       bottomNavigationBar: NavigationBar(

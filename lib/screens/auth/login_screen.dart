@@ -1,8 +1,58 @@
 import 'package:flutter/material.dart';
+import '../../api_service.dart';
+import '../../auth_service.dart';
 import 'register_screen.dart';
+import '../profile_screen.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override 
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+class _LoginScreenState extends State<LoginScreen> {
+  final _loginController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _loading = false;
+
+  @override
+  void dispose() {
+    _loginController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+  void _showMessage(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  Future<void> _login() async {
+    final login = _loginController.text.trim();
+    final password = _passwordController.text;
+
+    if (login.isEmpty || password.isEmpty) {
+      _showMessage('Lütfen tüm alanları doldur');
+      return;
+    }
+
+    setState(() => _loading = true);
+
+    try {
+      final user = await ApiService().login(login, password);
+      if (!mounted) return;
+
+      if (user != null) {
+        AuthService.login(user);
+        
+      } else {
+        _showMessage('Kullanıcı adı/e-posta veya şifre hatalı');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      _showMessage('Sunucuya bağlanılamadı');
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,16 +82,20 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 48),
-                const TextField(
-                  decoration: InputDecoration(
+                TextField(
+                  controller: _loginController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
                     labelText: 'E-posta veya Kullanıcı Adı',
                     prefixIcon: Icon(Icons.person_outline),
                     border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 16),
-                const TextField(
+                TextField(
+                  controller: _passwordController,
                   obscureText: true,
+                  onSubmitted: (_) => _loading ? null : _login(),
                   decoration: InputDecoration(
                     labelText: 'Şifre',
                     prefixIcon: Icon(Icons.lock_outline),
@@ -50,11 +104,17 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: _loading ? null : _login,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: const Text('Giriş Yap'),
+                  child: _loading
+                      ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2,),
+                      )
+                    :const Text('Giriş Yap'),
                 ),
                 const SizedBox(height: 12),
                 TextButton(
