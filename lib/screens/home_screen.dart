@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../api_service.dart';
 import '../movie.dart';
 //import 'movie_list_page.dart';
+import 'movie_detail_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,6 +25,13 @@ class _HomeScreenState extends State<HomeScreen> {
       _moviesFuture = ApiService().getMovies();
     });
   }
+
+  void _openDetail(BuildContext context, int movieId) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (_) => MovieDetailPage(movieId: movieId)),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +179,9 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: movies.length,
         itemBuilder: (context, index) {
           final movie = movies[index];
-          return Container(
+          return GestureDetector(
+            onTap: () => _openDetail(context, movie.id)  ,
+            child: Container(
             width: 110,
             margin: const EdgeInsets.only(right: 12.0),
             decoration: BoxDecoration(
@@ -186,11 +196,12 @@ class _HomeScreenState extends State<HomeScreen> {
               borderRadius: BorderRadius.circular(6.0),
               child: _poster(movie.posterUrl),
             ),
-          );
-        },
-      ),
-    );
-  }
+          ),
+        );
+      },
+    ),
+  );
+}
 
   // İnceleme Kartları
   Widget _buildRecentReviewsList(BuildContext context, List<Movie> movies) {
@@ -202,7 +213,10 @@ class _HomeScreenState extends State<HomeScreen> {
       itemCount: movies.length,
       itemBuilder: (context, index) {
         final movie = movies[index];
-        return Container(
+      
+        return GestureDetector(
+          onTap: () => _openDetail(context, movie.id),
+        child: Container(
           margin: const EdgeInsets.only(bottom: 16.0),
           padding: const EdgeInsets.all(12.0),
           decoration: BoxDecoration(
@@ -282,6 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
+        ),
         );
       },
     );
