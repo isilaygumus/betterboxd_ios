@@ -1,3 +1,6 @@
+# Google Drive Linki: https://drive.google.com/drive/folders/1sm-nkBhWY8_UwcIP1tDlzvZGIF1k7SZu?usp=sharing
+
+
 # betterboxd_ios
 
 Betterboxd
